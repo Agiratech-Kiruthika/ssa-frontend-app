@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { LoginForm } from '../../../models/forms/login.form';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../service/http/auth.service';
+import { SnackbarService } from '../../../service/utility/snackbar.service';
 
 @Component({
   selector: 'app-user-login',
@@ -14,10 +16,14 @@ export class UserLoginComponent  implements OnInit {
   loginForm!: FormGroup<LoginForm>;
   passwordVisible: boolean = false;
   errorMessages: { [key: string]: string } = {};
+  successMessage: string | null = null;
+  isSubmitting: boolean = false; 
 
     
   constructor(
-      private fb: FormBuilder
+      private fb: FormBuilder,
+      private authService: AuthService,
+      private snackbarService: SnackbarService 
     ) {
     
 
@@ -37,11 +43,31 @@ export class UserLoginComponent  implements OnInit {
   }
 
   onSubmit() {
+     this.isSubmitting = true;
      this.loginForm.markAllAsTouched();
      if(this.loginForm.invalid){
-      return
+      this.isSubmitting = false; 
+      return;
      }
-  }
+
+     const { email, password } = this.loginForm.value;
+
+     this.authService.login(email!, password!).subscribe({
+       next: (response) => {
+         this.successMessage = response.message;  
+         this.errorMessages = {};
+         this.snackbarService.openSnackbar(response.message, 'success'); 
+         this.isSubmitting = false;  
+         console.log(this.successMessage)
+       },
+       error: (error) => {
+         this.errorMessages['login'] = error.message || 'Login failed! Please try again.';
+         this.isSubmitting = false;  
+         this.snackbarService.openSnackbar(this.errorMessages['login'], 'error'); 
+         console.log(error.message)
+       },
+     });
+   }
 
   togglePasswordVisibility() {
     this.passwordVisible = !this.passwordVisible;
