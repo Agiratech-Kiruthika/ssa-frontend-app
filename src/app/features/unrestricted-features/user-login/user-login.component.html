@@ -54,7 +54,7 @@
                   class="w-full bg-red-500 text-white py-3 rounded-md  transition duration-300"
                   [disabled]="loginForm.invalid"
                  >
-                  Login
+                 {{ isSubmitting ? 'Logging in...' : 'Login' }}
                 </button>
               </form>
 

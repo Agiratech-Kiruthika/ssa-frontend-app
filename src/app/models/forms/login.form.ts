@@ -13,6 +13,5 @@ export class LoginForm implements ILoginForm {
 
   password = new FormControl('', [
     Validators.required,
-    Validators.minLength(6),
   ]);
 }
