@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../service/http/auth.service';
 import { SnackbarService } from '../../../service/utility/snackbar.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-login',
@@ -23,7 +24,8 @@ export class UserLoginComponent  implements OnInit {
   constructor(
       private fb: FormBuilder,
       private authService: AuthService,
-      private snackbarService: SnackbarService 
+      private snackbarService: SnackbarService ,
+      private router: Router 
     ) {
     
 
@@ -58,13 +60,12 @@ export class UserLoginComponent  implements OnInit {
          this.errorMessages = {};
          this.snackbarService.openSnackbar(response.message, 'success'); 
          this.isSubmitting = false;  
-         console.log(this.successMessage)
+         this.router.navigate(['/create-post']); 
        },
        error: (error) => {
          this.errorMessages['login'] = error.message || 'Login failed! Please try again.';
          this.isSubmitting = false;  
          this.snackbarService.openSnackbar(this.errorMessages['login'], 'error'); 
-         console.log(error.message)
        },
      });
    }
@@ -85,6 +86,8 @@ export class UserLoginComponent  implements OnInit {
       if (control?.invalid && (control.dirty || control.touched)) {
         if (control.hasError('required')) {
           this.errorMessages[field] = `${this.capitalize(field)} is required.`;
+        } else if (field === 'email' && control.hasError('email')) {
+          this.errorMessages[field] = 'Please enter a valid email address.';
         }
       }
     });
