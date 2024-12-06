@@ -4,24 +4,29 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SnackbarService } from '../../../service/utility/snackbar.service';
+import { AuthService } from '../../../service/http/auth.service';
+import { SignupService } from '../../../service/http/signup.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-user-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './user-signup.component.html',
   styleUrl: './user-signup.component.scss'
 })
 export class CreateAccountComponent implements OnInit {
   signupForm!: FormGroup<SignupForm>;
   passwordVisible: boolean = false;
+  confirmPasswordVisible: boolean = false;
   errorMessages: { [key: string]: string } = {};
   isSubmitting: boolean = false; 
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackbarService: SnackbarService 
+    private snackbarService: SnackbarService ,
+    private signupService: SignupService,
   ) {}
 
   ngOnInit() {
@@ -43,14 +48,21 @@ export class CreateAccountComponent implements OnInit {
       return;
     }
 
-    console.log('Form submitted:', this.signupForm.value);
-    this.snackbarService.openSnackbar('Signup successful! You can now log in.');
+    const userData = this.signupForm.value;
 
-    setTimeout(() => {
-      this.router.navigate(['/login']);
-    }, 3000); 
+    this.signupService.signup(userData).subscribe({
+      next: (response) => {
+        this.snackbarService.openSnackbar('Signup successful! You can now log in.');
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 3000);
+      },
+      error: (error) => {
+        this.snackbarService.openSnackbar('Signup failed. Please try again.', 'error');
+        this.isSubmitting = false;
+      }
+    });
   }
-
   private setErrorMessages() {
     this.errorMessages = {};
 
@@ -92,8 +104,13 @@ export class CreateAccountComponent implements OnInit {
   }
 
   togglePasswordVisibility() {
-    this.passwordVisible = !this.passwordVisible;
+    this.passwordVisible = !this.passwordVisible; 
   }
+
+  toggleConfirmPasswordVisibility() {
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;  
+  }
+  
 
   isPasswordStrong(password: string): boolean {
     const strongPasswordRegex =

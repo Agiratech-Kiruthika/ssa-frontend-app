@@ -76,7 +76,7 @@
                   </label>
                   <div class="relative">
                     <input
-                      [type]="passwordVisible ? 'text' : 'password'"
+                      [type]="confirmPasswordVisible ? 'text' : 'password'"
                       id="password"
                       class="w-full p-3 border border-gray-300 rounded-md"
                       placeholder="Confirm Password"
@@ -84,10 +84,10 @@
                     />
                     <button
                       type="button"
-                      (click)="togglePasswordVisibility()"
+                      (click)="toggleConfirmPasswordVisibility()"
                       class="absolute top-3 right-3 text-gray-500"
                     >
-                      <i [ngClass]="passwordVisible ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                      <i [ngClass]="confirmPasswordVisible ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
                     </button>
                   </div>
                   <div *ngIf="errorMessages['confirmPassword']" class="text-red-500 mt-2 text-sm">

@@ -83,12 +83,10 @@ export class UserLoginComponent  implements OnInit {
     };
   
     Object.entries(controls).forEach(([field, control]) => {
-      if (control?.invalid && (control.dirty || control.touched)) {
+      if (control?.invalid && !control.pristine && control.touched) {
         if (control.hasError('required')) {
           this.errorMessages[field] = `${this.capitalize(field)} is required.`;
-        } else if (field === 'email' && control.hasError('email')) {
-          this.errorMessages[field] = 'Please enter a valid email address.';
-        }
+        } 
       }
     });
   }
