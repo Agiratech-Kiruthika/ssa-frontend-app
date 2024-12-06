@@ -10,9 +10,9 @@ import { HttpClientModule } from '@angular/common/http';
   declarations: [ ],
   imports: [
     CommonModule,
+    HttpClientModule,
     AppRoutingModule,
-    ReactiveFormsModule,
-    HttpClientModule
+    ReactiveFormsModule   
   ]
 })
 export class AppModule { }
