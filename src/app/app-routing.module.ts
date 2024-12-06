@@ -4,6 +4,7 @@ import { UserLoginComponent } from './features/unrestricted-features/user-login/
 import { ResetPasswordComponent } from './features/unrestricted-features/reset-password/reset-password.component';
 import { CreateAccountComponent } from './features/unrestricted-features/user-signup/user-signup.component';
 import { CreatePostComponent } from './features/restricted-features/create-post/create-post.component';
+import { AuthGuard } from './service/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -25,7 +26,8 @@ export const routes: Routes = [
   },
   {
     path: 'create-post',
-    component: CreatePostComponent
+    component: CreatePostComponent,
+    canActivate: [AuthGuard]
   }
 ];
 

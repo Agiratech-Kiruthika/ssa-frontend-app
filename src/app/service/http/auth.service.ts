@@ -11,9 +11,19 @@ export class AuthService {
     const defaultPassword = 'password123';
 
     if (email === defaultEmail && password === defaultPassword) {
-      return of({ message: 'Login successful' }).pipe(delay(1000)); 
+      const mockToken = 'jwt-token';  
+      localStorage.setItem('token', mockToken);  
+      return of({ message: 'Login successful', token: mockToken }).pipe(delay(1000));
     }
 
     return throwError(() => new Error('Invalid email or password')).pipe(delay(1000));
+  }
+
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 }
