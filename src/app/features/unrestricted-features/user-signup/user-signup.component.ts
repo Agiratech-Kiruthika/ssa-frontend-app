@@ -2,38 +2,36 @@ import { Component, OnInit } from '@angular/core';
 import { SignupForm } from '../../../models/forms/signup.form';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../../service/utility/snackbar.service';
 import { AuthService } from '../../../service/http/auth.service';
 import { SignupService } from '../../../service/http/signup.service';
 import { HttpClientModule } from '@angular/common/http';
+import { hasError } from '../../../service/utility/validator';
 
 @Component({
   selector: 'app-user-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './user-signup.component.html',
-  styleUrl: './user-signup.component.scss'
+  styleUrl: './user-signup.component.scss',
 })
 export class CreateAccountComponent implements OnInit {
   signupForm!: FormGroup<SignupForm>;
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
   errorMessages: { [key: string]: string } = {};
-  isSubmitting: boolean = false; 
+  isSubmitting: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackbarService: SnackbarService ,
-    private signupService: SignupService,
+    private snackbarService: SnackbarService,
+    private signupService: SignupService
   ) {}
 
   ngOnInit() {
     this.initializeForm();
-    this.signupForm.valueChanges.subscribe(() => {
-      this.setErrorMessages();
-    });
   }
 
   initializeForm() {
@@ -44,7 +42,6 @@ export class CreateAccountComponent implements OnInit {
     this.isSubmitting = true;
     this.signupForm.markAllAsTouched();
     if (this.signupForm.invalid) {
-      this.setErrorMessages();
       return;
     }
 
@@ -52,70 +49,66 @@ export class CreateAccountComponent implements OnInit {
 
     this.signupService.signup(userData).subscribe({
       next: (response) => {
-        this.snackbarService.openSnackbar('Signup successful! You can now log in.');
+        this.snackbarService.openSnackbar(
+          'Signup successful! You can now log in.'
+        );
+        this.signupForm.reset();
+        this.isSubmitting = false;
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);
       },
       error: (error) => {
-        this.snackbarService.openSnackbar('Signup failed. Please try again.', 'error');
+        this.snackbarService.openSnackbar(
+          'Signup failed. Please try again.',
+          'error'
+        );
         this.isSubmitting = false;
-      }
+      },
     });
-  }
-  private setErrorMessages() {
-    this.errorMessages = {};
-
-    const controls = {
-      username: this.signupForm.get('username'),
-      email: this.signupForm.get('email'),
-      password: this.signupForm.get('password'),
-      confirmPassword: this.signupForm.get('confirmPassword'),
-    };
-
-    Object.entries(controls).forEach(([field, control]) => {
-      if (control?.invalid && (control.touched || control.dirty)) {
-        if (control.hasError('required')) {
-          this.errorMessages[field] = `${this.capitalize(field)} is required.`;
-        } else if (control.hasError('email')) {
-          this.errorMessages[field] = 'Invalid email format.';
-        } else if (control.hasError('minlength')) {
-          this.errorMessages[field] = `${this.capitalize(field)} must be at least ${control.getError('minlength')?.requiredLength} characters.`;
-        } else if (control.hasError('maxlength')) {
-          this.errorMessages[field] = `${this.capitalize(field)} must be at most ${control.getError('maxlength')?.requiredLength} characters.`;
-        }
-      }
-    });
-
-    const password = this.signupForm.get('password')?.value;
-    const confirmPassword = this.signupForm.get('confirmPassword')?.value;
-  
-    if (password && confirmPassword && password !== confirmPassword) {
-      this.errorMessages['confirmPassword'] = 'Passwords do not match.';
-    }
-
-    if (password && !this.isPasswordStrong(password)) {
-      this.errorMessages['password'] = 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
-    }
-  }
-
-  private capitalize(word: string): string {
-    return word.charAt(0).toUpperCase() + word.slice(1);
   }
 
   togglePasswordVisibility() {
-    this.passwordVisible = !this.passwordVisible; 
+    this.passwordVisible = !this.passwordVisible;
   }
 
   toggleConfirmPasswordVisibility() {
-    this.confirmPasswordVisible = !this.confirmPasswordVisible;  
-  }
-  
-
-  isPasswordStrong(password: string): boolean {
-    const strongPasswordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return strongPasswordRegex.test(password);
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
   }
 
+  get hasError() {
+    return hasError;
+  }
+
+  getErrorMessage(controlName: string): string | null {
+    const control = this.signupForm.get(controlName);
+    if (!control) return null;
+
+    const errorMessages: { [key: string]: { [key: string]: string } } = {
+      email: {
+        required: 'Email is required.',
+        invalidEmail: 'Invalid email address.',
+      },
+      password: {
+        required: 'Password is required.',
+        minLength: 'Password must be at least 8 characters long.',
+        upperCase: 'Password must contain at least one uppercase letter.',
+        lowerCase: 'Password must contain at least one lowercase letter.',
+        specialCharacter:
+          'Password must include at least one special character.',
+        noSpaces: 'Password cannot contain spaces.',
+      },
+    };
+
+    const controlErrors = errorMessages[controlName];
+    if (!controlErrors) return null;
+
+    for (const error in control.errors) {
+      if (controlErrors[error]) {
+        return controlErrors[error];
+      }
+    }
+
+    return null;
+  }
 }
