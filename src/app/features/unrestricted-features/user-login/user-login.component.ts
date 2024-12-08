@@ -4,96 +4,79 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../service/http/auth.service';
 import { SnackbarService } from '../../../service/utility/snackbar.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { hasError } from '../../../service/utility/validator';
 
 @Component({
   selector: 'app-user-login',
   standalone: true,
-  imports: [ ReactiveFormsModule,CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './user-login.component.html',
-  styleUrl: './user-login.component.scss'
+  styleUrl: './user-login.component.scss',
 })
-export class UserLoginComponent  implements OnInit {
+export class UserLoginComponent implements OnInit {
   loginForm!: FormGroup<LoginForm>;
   passwordVisible: boolean = false;
-  errorMessages: { [key: string]: string } = {};
   successMessage: string | null = null;
-  isSubmitting: boolean = false; 
+  isSubmitting: boolean = false;
 
-    
   constructor(
-      private fb: FormBuilder,
-      private authService: AuthService,
-      private snackbarService: SnackbarService ,
-      private router: Router 
-    ) {
-    
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private snackbarService: SnackbarService,
+    private router: Router
+  ) {}
 
-      }
-  
-    ngOnInit() {
-      this.initializeFormData();
-  
-      this.loginForm.valueChanges.subscribe(() => {
-        this.setErrorMessages();
-      });
-    }
-  
+  ngOnInit() {
+    this.initializeFormData();
+  }
 
   initializeFormData() {
     this.loginForm = this.fb.group<LoginForm>(new LoginForm());
   }
 
   onSubmit() {
-     this.isSubmitting = true;
-     this.loginForm.markAllAsTouched();
-     if(this.loginForm.invalid){
-      this.isSubmitting = false; 
+    this.isSubmitting = true;
+    this.loginForm.markAllAsTouched();
+    if (this.loginForm.invalid) {
+      this.isSubmitting = false;
       return;
-     }
+    }
 
-     const { email, password } = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
 
-     this.authService.login(email!, password!).subscribe({
-       next: (response) => {
-         this.successMessage = response.message;  
-         this.errorMessages = {};
-         this.snackbarService.openSnackbar(response.message, 'success'); 
-         this.isSubmitting = false;  
-         this.router.navigate(['/create-post']); 
-       },
-       error: (error) => {
-         this.errorMessages['login'] = error.message || 'Login failed! Please try again.';
-         this.isSubmitting = false;  
-         this.snackbarService.openSnackbar(this.errorMessages['login'], 'error'); 
-       },
-     });
-   }
+    this.authService.login(email!, password!).subscribe({
+      next: (response) => {
+        this.successMessage = response.message;
+        this.snackbarService.openSnackbar(response.message, 'success');
+        this.isSubmitting = false;
+        this.router.navigate(['/create-post']);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+      },
+    });
+  }
 
   togglePasswordVisibility() {
     this.passwordVisible = !this.passwordVisible;
   }
 
-  private setErrorMessages() {
-    this.errorMessages = {};
-  
-    const controls = {
-      email: this.loginForm.get('email'),
-      password: this.loginForm.get('password'),
-    };
-  
-    Object.entries(controls).forEach(([field, control]) => {
-      if (control?.invalid && !control.pristine && control.touched) {
-        if (control.hasError('required')) {
-          this.errorMessages[field] = `${this.capitalize(field)} is required.`;
-        } 
-      }
-    });
+  get hasError() {
+    return hasError;
   }
-  
-  private capitalize(word: string): string {
-    return word.charAt(0).toUpperCase() + word.slice(1);
-  }
-  
 
+  getErrorMessage(controlName: string): string | null {
+    const control = this.loginForm.get(controlName);
+
+    if (control?.hasError('required')) {
+      return 'Email is required.';
+    }
+
+    if (control?.hasError('invalidEmail')) {
+      return 'Invalid email address.';
+    }
+
+    return null;
+  }
 }
