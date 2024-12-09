@@ -61,7 +61,7 @@ export class UserLoginComponent implements OnInit {
           panelClass: ['success-snackbar'],
         });
         this.isSubmitting = false;
-        this.router.navigate(['/create-post']);
+        this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.snackbar.open('Login failed. Please try again.', 'Close', {

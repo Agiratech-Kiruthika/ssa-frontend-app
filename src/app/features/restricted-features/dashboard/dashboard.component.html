@@ -1,0 +1,85 @@
+<div class="flex h-screen">
+  <div
+    class="sidebar bg-black text-white w-64 p-6 flex flex-col space-y-6 transition-all"
+  >
+    <div class="flex items-left justify-between">
+      <div class="flex items-center space-x-2">
+        <img
+          src="assets/favicon.ico"
+          alt="Profile Logo"
+          class="w-8 h-8 rounded-full"
+        />
+        <span class="font-bold text-lg">InstaFlow</span>
+      </div>
+
+      <div class="relative inline-block">
+        <span class="text-lg cursor-pointer" (click)="toggleProfileMenu()">
+          &#x22EE;
+        </span>
+
+        <div
+          *ngIf="profileMenuVisible"
+          class="absolute left-full ml-2 mt-0 w-48 bg-gray-800 text-white rounded-md shadow-lg overflow-visible z-50 py-2"
+        >
+          <ul>
+            <li class="m-2">
+              <button
+                class="block px-4 py-2 text-sm hover:bg-red-500 w-full text-left"
+                (click)="editProfile()"
+              >
+                Edit Profile
+              </button>
+            </li>
+            <li class="m-2">
+              <button
+                class="block px-4 py-2 text-sm hover:bg-red-500 w-full text-left"
+                (click)="logout()"
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <button
+      (click)="changeSection('home')"
+      [class.bg-red-600]="selectedSection === 'home'"
+      class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
+    >
+      <i class="fa fa-home text-lg"></i>
+      <span>Home</span>
+    </button>
+
+    <button
+      (click)="changeSection('feed')"
+      [class.bg-red-600]="selectedSection === 'feed'"
+      class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
+    >
+      <i class="fa fa-list text-lg"></i>
+      <span>Your Feed</span>
+    </button>
+
+    <button
+      (click)="changeSection('create')"
+      [class.bg-red-600]="selectedSection === 'create'"
+      class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
+    >
+      <i class="fa fa-plus-circle text-lg"></i>
+      <span>Create Post</span>
+    </button>
+  </div>
+
+  <div class="main-content flex-1 p-6">
+    <div *ngIf="selectedSection === 'home'" class="text-center">
+      <h1 class="text-3xl font-bold">Home Page</h1>
+    </div>
+    <div *ngIf="selectedSection === 'feed'" class="text-center">
+      <h1 class="text-3xl font-bold">Your Feed</h1>
+    </div>
+    <div *ngIf="selectedSection === 'create'" class="text-center">
+        <app-create-post></app-create-post>
+    </div>
+  </div>
+</div>
