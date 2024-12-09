@@ -1,18 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { SignupForm } from '../../../models/forms/signup.form';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { SnackbarService } from '../../../service/utility/snackbar.service';
-import { AuthService } from '../../../service/http/auth.service';
 import { SignupService } from '../../../service/http/signup.service';
-import { HttpClientModule } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { hasError } from '../../../service/utility/validator';
 
 @Component({
   selector: 'app-user-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatSnackBarModule],
   templateUrl: './user-signup.component.html',
   styleUrl: './user-signup.component.scss',
 })
@@ -20,14 +23,13 @@ export class CreateAccountComponent implements OnInit {
   signupForm!: FormGroup<SignupForm>;
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
-  errorMessages: { [key: string]: string } = {};
   isSubmitting: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackbarService: SnackbarService,
-    private signupService: SignupService
+    private signupService: SignupService,
+    private snackbar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -41,28 +43,33 @@ export class CreateAccountComponent implements OnInit {
   onSubmit() {
     this.isSubmitting = true;
     this.signupForm.markAllAsTouched();
+
     if (this.signupForm.invalid) {
+      this.isSubmitting = false;
+      this.snackbar.open('Please correct the errors in the form.', 'Close', {
+        duration: 3000,
+      });
       return;
     }
 
     const userData = this.signupForm.value;
 
     this.signupService.signup(userData).subscribe({
-      next: (response) => {
-        this.snackbarService.openSnackbar(
-          'Signup successful! You can now log in.'
-        );
+      next: () => {
+        this.snackbar.open('Signup successful! You can now log in.', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
         this.signupForm.reset();
         this.isSubmitting = false;
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);
       },
-      error: (error) => {
-        this.snackbarService.openSnackbar(
-          'Signup failed. Please try again.',
-          'error'
-        );
+      error: () => {
+        this.snackbar.open('Signup failed. Please try again.', 'Close', {
+          duration: 3000,
+        });
         this.isSubmitting = false;
       },
     });
