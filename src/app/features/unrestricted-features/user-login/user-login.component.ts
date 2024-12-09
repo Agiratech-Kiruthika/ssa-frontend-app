@@ -1,30 +1,34 @@
 import { Component, OnInit } from '@angular/core';
-import { LoginForm } from '../../../models/forms/login.form';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../service/http/auth.service';
-import { SnackbarService } from '../../../service/utility/snackbar.service';
 import { Router, RouterLink } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { LoginForm } from '../../../models/forms/login.form';
+import { AuthService } from '../../../service/http/auth.service';
 import { hasError } from '../../../service/utility/validator';
 
 @Component({
   selector: 'app-user-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, MatSnackBarModule],
   templateUrl: './user-login.component.html',
   styleUrl: './user-login.component.scss',
 })
 export class UserLoginComponent implements OnInit {
   loginForm!: FormGroup<LoginForm>;
-  passwordVisible: boolean = false;
-  successMessage: string | null = null;
-  isSubmitting: boolean = false;
+  passwordVisible = false;
+  isSubmitting = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackbarService: SnackbarService,
-    private router: Router
+    private router: Router,
+    private snackbar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -38,8 +42,13 @@ export class UserLoginComponent implements OnInit {
   onSubmit() {
     this.isSubmitting = true;
     this.loginForm.markAllAsTouched();
+
     if (this.loginForm.invalid) {
       this.isSubmitting = false;
+      this.snackbar.open('Please correct the errors in the form.', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
       return;
     }
 
@@ -47,12 +56,18 @@ export class UserLoginComponent implements OnInit {
 
     this.authService.login(email!, password!).subscribe({
       next: (response) => {
-        this.successMessage = response.message;
-        this.snackbarService.openSnackbar(response.message, 'success');
+        this.snackbar.open('Login successful!', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
         this.isSubmitting = false;
         this.router.navigate(['/create-post']);
       },
       error: (error) => {
+        this.snackbar.open('Login failed. Please try again.', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        });
         this.isSubmitting = false;
       },
     });
