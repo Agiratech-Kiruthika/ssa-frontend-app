@@ -5,34 +5,40 @@ import { ResetPasswordComponent } from './features/unrestricted-features/reset-p
 import { CreateAccountComponent } from './features/unrestricted-features/user-signup/user-signup.component';
 import { CreatePostComponent } from './features/restricted-features/create-post/create-post.component';
 import { AuthGuard } from './service/guards/auth.guard';
+import { DashboardComponent } from './features/restricted-features/dashboard/dashboard.component';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login', 
+    redirectTo: 'login',
   },
   {
     path: 'login',
-    component: UserLoginComponent, 
+    component: UserLoginComponent,
   },
   {
     path: 'forgot-password',
-    component: ResetPasswordComponent 
+    component: ResetPasswordComponent,
   },
   {
     path: 'sign-up',
-    component:  CreateAccountComponent 
+    component: CreateAccountComponent,
   },
   {
     path: 'create-post',
     component: CreatePostComponent,
-    canActivate: [AuthGuard]
-  }
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}
