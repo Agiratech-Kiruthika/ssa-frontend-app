@@ -10,7 +10,7 @@
         <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
           <div class="mb-4">
             <label
-              for="username"
+              for="userName"
               class="block text-sm font-medium text-gray-700"
             >
               Username <span class="text-red-500">*</span>
@@ -20,11 +20,11 @@
               id="username"
               class="w-full p-3 border border-gray-300 rounded-md"
               placeholder="Username"
-              formControlName="username"
+              formControlName="userName"
             />
             <div
               class="text-red-500 mt-2 text-sm"
-              *ngIf="signupForm.get('username')?.touched"
+              *ngIf="signupForm.get('userName')?.touched"
             >
               <small *ngIf="hasError(signupForm, 'username', 'required')">
                 Username is required.

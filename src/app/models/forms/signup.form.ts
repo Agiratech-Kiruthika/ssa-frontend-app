@@ -6,14 +6,14 @@ import {
 } from '../../service/utility/validator';
 
 export interface ISignupForm {
-  username: FormControl<string | null>;
+  userName: FormControl<string | null>;
   email: FormControl<string | null>;
   password: FormControl<string | null>;
   confirmPassword: FormControl<string | null>;
 }
 
 export class SignupForm implements ISignupForm {
-  username = new FormControl('', [Validators.required]);
+  userName = new FormControl('', [Validators.required]);
 
   email = new FormControl('', [Validators.required, emailValidator()]);
 

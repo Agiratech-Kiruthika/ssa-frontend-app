@@ -55,19 +55,22 @@ export class CreateAccountComponent implements OnInit {
     const userData = this.signupForm.value;
 
     this.signupService.signup(userData).subscribe({
-      next: () => {
-        this.snackbar.open('Signup successful! You can now log in.', 'Close', {
-          duration: 3000,
-          panelClass: ['success-snackbar'],
+      next: (response) => {
+        const successMessage = response.data || 'Signup successful!';
+
+        this.snackbar.open(successMessage, 'Close', {
+          duration: 4000,
         });
+
         this.signupForm.reset();
         this.isSubmitting = false;
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 3000);
+        this.router.navigate(['/login']);
       },
-      error: () => {
-        this.snackbar.open('Signup failed. Please try again.', 'Close', {
+      error: (error) => {
+        const errorMessage =
+          error?.error?.data || 'An error occurred. Please try again later.';
+
+        this.snackbar.open(errorMessage, 'Close', {
           duration: 3000,
         });
         this.isSubmitting = false;
