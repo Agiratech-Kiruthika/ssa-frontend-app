@@ -26,11 +26,7 @@
               class="text-red-500 mt-2 text-sm"
               *ngIf="signupForm.get('username')?.touched"
             >
-              <small
-                *ngIf="
-                  hasError(signupForm, 'username', 'required', isSubmitting)
-                "
-              >
+              <small *ngIf="hasError(signupForm, 'username', 'required')">
                 Username is required.
               </small>
             </div>
@@ -120,25 +116,13 @@
               *ngIf="signupForm.get('confirmPassword')?.touched"
             >
               <small
-                *ngIf="
-                  hasError(
-                    signupForm,
-                    'confirmPassword',
-                    'required',
-                    isSubmitting
-                  )
-                "
+                *ngIf="hasError(signupForm, 'confirmPassword', 'required')"
               >
                 Confirm Password is required.
               </small>
               <small
                 *ngIf="
-                  hasError(
-                    signupForm,
-                    'confirmPassword',
-                    'passwordsMismatch',
-                    isSubmitting
-                  )
+                  hasError(signupForm, 'confirmPassword', 'passwordsMismatch')
                 "
               >
                 Passwords do not match.

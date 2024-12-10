@@ -1,4 +1,4 @@
-<div class="flex h-screen">
+<div class="flex min-h-screen">
   <div
     class="sidebar bg-black text-white w-64 p-6 flex flex-col space-y-6 transition-all"
   >
@@ -71,7 +71,7 @@
     </button>
   </div>
 
-  <div class="main-content flex-1 p-6">
+  <div class="main-content">
     <div *ngIf="selectedSection === 'home'" class="text-center">
       <h1 class="text-3xl font-bold">Home Page</h1>
     </div>
@@ -79,7 +79,7 @@
       <h1 class="text-3xl font-bold">Your Feed</h1>
     </div>
     <div *ngIf="selectedSection === 'create'" class="text-center">
-        <app-create-post></app-create-post>
+      <app-create-post></app-create-post>
     </div>
   </div>
 </div>

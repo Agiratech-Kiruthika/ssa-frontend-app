@@ -71,9 +71,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.isOtpSent = true;
     this.resendOtpDisabled = true;
     this.startOtpTimer();
-    const message = this.isOtpSent
-      ? 'OTP resent successfully.'
-      : 'OTP sent successfully.';
+    const message = 'OTP sent successfully.';
     this.snackBar.open(message, 'Close', {
       duration: 3000,
     });

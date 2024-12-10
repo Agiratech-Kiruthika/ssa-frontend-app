@@ -44,16 +44,12 @@ export function passwordValidator(): ValidatorFn {
 export function hasError(
   form: FormGroup,
   controlName: string,
-  errorName: string,
-  submitted: boolean
+  errorName: string
 ): boolean {
   const control = form.get(controlName);
-  return !!(
-    control &&
-    (control.touched || submitted) &&
-    control.errors?.[errorName]
-  );
+  return !!(control && control.touched && control.errors?.[errorName]);
 }
+
 
 export function matchPasswordValidator(passwordField: string): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
