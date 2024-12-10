@@ -3,11 +3,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../service/http/auth.service';
 import { CommonModule } from '@angular/common';
 import { CreatePostComponent } from '../create-post/create-post.component';
+import { FeedComponent } from "../feed/feed.component";
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule,CreatePostComponent],
+  imports: [CommonModule, CreatePostComponent,  FeedComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -32,12 +33,6 @@ export class DashboardComponent {
   toggleProfileMenu() {
     this.profileMenuVisible = !this.profileMenuVisible;
   }
-
-  editProfile() {
-    this.profileMenuVisible = false; 
-    console.log('Edit Profile');
-  }
-
 
   viewProfile() {
     this.profileMenuVisible = false; 
