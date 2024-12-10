@@ -1,1 +1,164 @@
-<p>create-post works!</p>
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-2xl bg-white rounded-lg shadow-lg p-8">
+    <form [formGroup]="createPostForm" (ngSubmit)="submitPost()">
+      <h1 class="text-3xl font-bold text-center text-red-500 mb-8">
+        Create a Post
+      </h1>
+
+      <div class="flex justify-between items-center mb-8">
+        <ng-container *ngFor="let step of [1, 2, 3, 4]">
+          <div class="flex items-center">
+            <div
+              class="w-10 h-10 flex items-center justify-center rounded-full font-bold"
+              [ngClass]="{
+                'bg-red-500 text-white': currentStep >= step,
+                'bg-gray-300 text-gray-600': currentStep < step
+              }"
+            >
+              {{ step }}
+            </div>
+          </div>
+          <div
+            *ngIf="step !== 4"
+            class="flex-grow h-1 mx-2"
+            [ngClass]="{
+              'bg-red-500': currentStep > step,
+              'bg-gray-300': currentStep <= step
+            }"
+          ></div>
+        </ng-container>
+      </div>
+
+
+      <div *ngIf="currentStep === 1">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          Step 1: Upload Image
+        </h2>
+        <div class="flex flex-col items-center">
+
+          <input
+            #imageInput
+            type="file"
+            id="image"
+            accept=".jpg, .jpeg, .png"
+            (change)="onImageSelect($event)"
+            class="hidden"
+          />
+
+          <label
+            for="image"
+            class="py-2 px-4 mb-2 mbg-gray-300 text-gray-700 rounded-lg bg-gray-400 cursor-pointer hover:bg-gray-400"
+          >
+            Choose a file
+          </label>
+
+          <div *ngIf="fileName" class="mt-4 mb-2 flex items-center">
+            <span class="text-gray-700 mr-2">{{ fileName }}</span>
+            <span
+              class="cursor-pointer text-red-500 hover:text-red-700"
+              (click)="resetImage(imageInput)"
+            >
+              ✖
+            </span>
+          </div>
+
+          <p class="text-sm text-red-500 mt-2" *ngIf="imageError">
+            {{ imageError }}
+          </p>
+          <p class="text-sm text-gray-500 mt-2">
+            Max file size: 5MB. Formats: JPG, JPEG, PNG.
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="currentStep === 2">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          Step 2: Add Title
+        </h2>
+        <input
+          type="text"
+          placeholder="Enter post title"
+          formControlName="title"
+          class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+        />
+        <p
+          *ngIf="
+            createPostForm.get('title')?.touched &&
+            createPostForm.get('title')?.hasError('required')
+          "
+          class="text-sm text-red-500"
+        >
+          Title is required.
+        </p>
+        <p
+          *ngIf="
+            createPostForm.get('title')?.touched &&
+            createPostForm.get('title')?.hasError('minlength')
+          "
+          class="text-sm text-red-500"
+        >
+          Title must be at least 3 characters long.
+        </p>
+      </div>
+
+      <div *ngIf="currentStep === 3">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          Step 3: Add Description
+        </h2>
+        <textarea
+          rows="4"
+          placeholder="Enter post description"
+          formControlName="description"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+        ></textarea>
+        <p
+          *ngIf="hasError(createPostForm, 'description', 'required')"
+          class="text-sm text-red-500"
+        >
+          Description is required.
+        </p>
+        <p
+          *ngIf="hasError(createPostForm, 'description', 'minlength')"
+          class="text-sm text-red-500"
+        >
+          Description must be at least 10 characters long.
+        </p>
+      </div>
+
+      <div *ngIf="currentStep === 4">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          Step 4: Add Tags
+        </h2>
+        <input
+          type="text"
+          placeholder="Enter tags separated by commas"
+          formControlName="tags"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+        />
+        <p
+          *ngIf="hasError(createPostForm, 'tags', 'required')"
+          class="text-sm text-red-500"
+        >
+          Tags are required.
+        </p>
+      </div>
+
+      <div class="mt-6 flex justify-between">
+        <button
+          (click)="prevStep()"
+          [disabled]="currentStep === 1"
+          class="py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+        <button
+          (click)="nextStep()"
+          [disabled]="!isStepValid()"
+          class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {{ currentStep === 4 ? "Submit" : "Next" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
