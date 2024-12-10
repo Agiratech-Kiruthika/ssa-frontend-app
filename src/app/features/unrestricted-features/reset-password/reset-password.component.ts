@@ -15,6 +15,7 @@ import {
   passwordValidator,
 } from '../../../service/utility/validator';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ResetPasswordService } from '../../../service/http/resetPassword.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -35,11 +36,13 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   otpSubscription: Subscription | null = null;
   passwordVisible = false;
   confirmPasswordVisible = false;
+  isLoadingOtp = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private resetPasswordService: ResetPasswordService
   ) {
     this.emailForm = this.fb.group({
       email: ['', [Validators.required, emailValidator()]],
@@ -65,15 +68,23 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
 
   sendOtp() {
     if (this.emailForm.invalid) return;
+    this.isLoadingOtp = true;
 
-    console.log('Sending OTP to:', this.emailForm.get('email')?.value);
-
-    this.isOtpSent = true;
-    this.resendOtpDisabled = true;
-    this.startOtpTimer();
-    const message = 'OTP sent successfully.';
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
+    const email = this.emailForm.get('email')?.value;
+    this.resetPasswordService.sendOtp(email).subscribe({
+      next: (response) => {
+        this.isOtpSent = true;
+        this.isLoadingOtp = false;
+        this.resendOtpDisabled = true;
+        this.startOtpTimer();
+        this.snackBar.open(response.data, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.isLoadingOtp = false;
+        this.snackBar.open('Error sending OTP. Please try again.', 'Close', {
+          duration: 3000,
+        });
+      },
     });
   }
 
@@ -99,29 +110,47 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   }
 
   verifyOtp() {
-    const enteredOtp = this.otpForm.get('otp')?.value;
+    const email = this.emailForm.get('email')?.value;
+    const otp = this.otpForm.get('otp')?.value;
 
-    if (enteredOtp === '123456') {
-      this.isOtpVerified = true;
-      this.stopOtpTimer();
-
-      this.snackBar.open('OTP verified successfully.', 'Close', {
-        duration: 3000,
-      });
-    } else {
-      this.snackBar.open('Invalid OTP. Please try again.', 'Close', {
-        duration: 3000,
-      });
-    }
+    this.resetPasswordService.verifyOtp(email, otp).subscribe({
+      next: (response) => {
+        this.isOtpVerified = true;
+        this.stopOtpTimer();
+        this.snackBar.open(response.data, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.snackBar.open('Invalid OTP. Please try again.', 'Close', {
+          duration: 3000,
+        });
+      },
+    });
   }
 
   resetPassword() {
     if (this.resetPasswordForm.invalid) return;
 
-    this.snackBar.open('Password reset successfully.', 'Close', {
-      duration: 3000,
-    });
-    this.router.navigate(['/login']);
+    const email = this.emailForm.get('email')?.value;
+    const newPassword = this.resetPasswordForm.get('password')?.value;
+    const confirmPassword =
+      this.resetPasswordForm.get('confirmPassword')?.value;
+    this.resetPasswordService
+      .resetPassword(email, newPassword, confirmPassword)
+      .subscribe({
+        next: (response) => {
+          this.snackBar.open(response.data, 'Close', {
+            duration: 3000,
+          });
+          this.router.navigate(['/login']);
+        },
+        error: (error) => {
+          this.snackBar.open(
+            'Error resetting password. Please try again.',
+            'Close',
+            { duration: 3000 }
+          );
+        },
+      });
   }
 
   handleBackNavigation() {
