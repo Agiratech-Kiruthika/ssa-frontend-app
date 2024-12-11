@@ -4,11 +4,12 @@ import { AuthService } from '../../../service/http/auth.service';
 import { CommonModule } from '@angular/common';
 import { CreatePostComponent } from '../create-post/create-post.component';
 import { FeedComponent } from "../feed/feed.component";
+import { HomeComponent } from "../home/home.component";
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CreatePostComponent,  FeedComponent],
+  imports: [CommonModule, CreatePostComponent, FeedComponent, HomeComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
