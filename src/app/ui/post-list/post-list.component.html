@@ -1,0 +1,66 @@
+<div class="max-w-3xl mx-auto p-4">
+  <div *ngFor="let post of posts" class="mb-6 bg-white shadow rounded-lg">
+    <!-- Post Header -->
+    <div class="flex items-center justify-between p-4 border-b">
+      <!-- User Info -->
+      <div class="flex">
+        <div
+          class="w-10 h-10 flex items-center justify-center bg-gray-300 text-gray-700 font-semibold rounded-full"
+        >
+          {{ post.username | slice : 0 : 1 }}
+        </div>
+        <div class="ml-2">
+          <p class="font-semibold text-gray-900">{{ post.username }}</p>
+          <p class="text-sm text-gray-500">{{ post.title }}</p>
+        </div>
+      </div>
+      <!-- Actions (Share and Three-dot Menu) -->
+      <div class="flex items-center space-x-4 relative">
+        <!-- Share Button -->
+        <button class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-share text-xl"></i>
+        </button>
+        <!-- Three-dot Menu -->
+        <button class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-ellipsis-v text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post Image -->
+    <div class="relative">
+      <img class="w-full" [src]="post.image" alt="Post Image" />
+    </div>
+
+    <div class="p-4">
+      <div class="flex items-center justify-left">
+        <!-- Like Section -->
+        <div class="text-center m-2">
+          <button
+            class="focus:outline-none"
+            [class.text-red-500]="post.isLiked"
+            [class.text-gray-500]="!post.isLiked"
+            (click)="toggleLike(post)"
+          >
+            <i class="fas fa-heart text-xl"></i>
+          </button>
+          <p class="text-sm text-gray-800 font-semibold">
+            {{ post.likes }} likes
+          </p>
+        </div>
+        <!-- Comment Section -->
+        <div class="text-center">
+          <button
+            class="text-gray-500 hover:text-gray-700 focus:outline-none"
+            (click)="openComments(post)"
+          >
+            <i class="fas fa-comment text-xl"></i>
+          </button>
+          <p class="text-sm text-gray-800 font-semibold">
+            {{ post.comments }} comments
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
