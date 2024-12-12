@@ -3,40 +3,41 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../service/http/auth.service';
 import { CommonModule } from '@angular/common';
 import { CreatePostComponent } from '../create-post/create-post.component';
-import { FeedComponent } from "../feed/feed.component";
-import { HomeComponent } from "../home/home.component";
+import { FeedComponent } from '../feed/feed.component';
+import { HomeComponent } from '../home/home.component';
+import { LogoutConfirmationComponent } from '../../../ui/logout-confirmation/logout-confirmation.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, CreatePostComponent, FeedComponent, HomeComponent],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
-  selectedSection: string = 'home';  
-  profileMenuVisible: boolean = false;  
+  selectedSection: string = 'home';
 
-  constructor
-  (private authService: AuthService, private router: Router) {}
-  
+  constructor(private authService: AuthService, private router: Router,private dialog: MatDialog) {}
+
   changeSection(section: string) {
     this.selectedSection = section;
   }
 
   logout() {
-   
-    this.authService.logout();  
-    this.router.navigate(['/login']);  
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
+  confirmLogout() {
+    const dialogRef = this.dialog.open(LogoutConfirmationComponent, {
+      width: '400px',
+    });
 
-  toggleProfileMenu() {
-    this.profileMenuVisible = !this.profileMenuVisible;
-  }
-
-  viewProfile() {
-    this.profileMenuVisible = false; 
-    console.log('View Profile');
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.logout(); 
+      }
+    });
   }
 }
