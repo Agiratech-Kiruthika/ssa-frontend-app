@@ -24,6 +24,7 @@
     "@angular/router": "^17.3.0",
     "@angular/ssr": "^17.3.9",
     "autoprefixer": "^10.4.20",
+    "compressorjs": "^1.2.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "postcss": "^8.4.49",
