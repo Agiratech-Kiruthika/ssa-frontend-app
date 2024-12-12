@@ -1,22 +1,41 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { catchError, delay, map } from 'rxjs/operators';
+import { environment } from '../../../environment/environment';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  login(email: string, password: string): Observable<{ message: string }> {
-    const defaultEmail = 'test@example.com';
-    const defaultPassword = 'password123';
+  constructor(private http: HttpClient) {}
+  private readonly apiUrl = `${environment.apiUrl}/user/login`;
 
-    if (email === defaultEmail && password === defaultPassword) {
-      const mockToken = 'jwt-token';  
-      localStorage.setItem('token', mockToken);  
-      return of({ message: 'Login successful', token: mockToken }).pipe(delay(1000));
-    }
+  login(email: string, password: string): Observable<any> {
+    const loginPayload = { email, password };
 
-    return throwError(() => new Error('Invalid email or password')).pipe(delay(1000));
+    return this.http.post<any>(this.apiUrl, loginPayload).pipe(
+      map((response) => {
+        if (response) {
+          const customToken = this.generateCustomToken(email, password);
+
+          localStorage.setItem('token', customToken);
+          localStorage.setItem('userId', response.data.userId);
+
+          return response.data;
+        } else {
+          throw new Error(response.status?.description || 'Login failed');
+        }
+      }),
+      catchError((err) => {
+        return throwError(() => new Error(err));
+      })
+    );
+  }
+
+  private generateCustomToken(email: string, password: string): string {
+    const tokenData = `${email}:${password}`;
+    return btoa(tokenData);
   }
 
   isAuthenticated(): boolean {
@@ -27,7 +46,12 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
+  getUserId(): string | null {
+    return localStorage.getItem('userId');
+  }
+
   logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
   }
 }

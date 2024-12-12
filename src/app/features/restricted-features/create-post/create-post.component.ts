@@ -61,8 +61,8 @@ export class CreatePostComponent {
 
       new Compressor(file, {
         quality: 0.8,
-        maxWidth: 1024,
-        maxHeight: 1024,
+        maxWidth: 5867,  
+        maxHeight: 3911,
         success: (compressedFile) => {
           const reader = new FileReader();
           reader.onload = (e: any) => {
@@ -121,7 +121,7 @@ export class CreatePostComponent {
       formData.append('title', this.postForm.get('title')?.value);
       formData.append('description', this.postForm.get('description')?.value);
 
-      formData.append('tags', JSON.stringify(this.selectedTags));
+      formData.append('tags', this.selectedTags.join(','));
 
       this.selectedImages.forEach((image) => {
         formData.append('images', image.file, image.file.name);

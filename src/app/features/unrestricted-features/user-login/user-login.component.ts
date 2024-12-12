@@ -45,10 +45,6 @@ export class UserLoginComponent implements OnInit {
 
     if (this.loginForm.invalid) {
       this.isSubmitting = false;
-      this.snackbar.open('Please correct the errors in the form.', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
       return;
     }
 
@@ -56,17 +52,15 @@ export class UserLoginComponent implements OnInit {
 
     this.authService.login(email!, password!).subscribe({
       next: (response) => {
-        this.snackbar.open('Login successful!', 'Close', {
+        this.snackbar.open("Login Successfully", 'Close', {
           duration: 3000,
-          panelClass: ['success-snackbar'],
         });
         this.isSubmitting = false;
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        this.snackbar.open('Login failed. Please try again.', 'Close', {
+        this.snackbar.open("Invalid user or password", 'Close', {
           duration: 3000,
-          panelClass: ['error-snackbar'],
         });
         this.isSubmitting = false;
       },
