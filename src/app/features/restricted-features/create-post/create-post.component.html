@@ -1,163 +1,104 @@
-<div class="flex items-center justify-center min-h-screen bg-gray-100">
-  <div class="w-full max-w-2xl bg-white rounded-lg shadow-lg p-8">
-    <form [formGroup]="createPostForm" (ngSubmit)="submitPost()">
-      <h1 class="text-3xl font-bold text-center text-red-500 mb-8">
-        Create a Post
-      </h1>
-
-      <div class="flex justify-between items-center mb-8">
-        <ng-container *ngFor="let step of [1, 2, 3, 4]">
-          <div class="flex items-center">
-            <div
-              class="w-10 h-10 flex items-center justify-center rounded-full font-bold"
-              [ngClass]="{
-                'bg-red-500 text-white': currentStep >= step,
-                'bg-gray-300 text-gray-600': currentStep < step
-              }"
-            >
-              {{ step }}
-            </div>
+<div class="max-w-3xl mx-auto p-4">
+  <div class="bg-white p-6 rounded-lg shadow-lg">
+    <form [formGroup]="postForm" (ngSubmit)="postContent()">
+      <div class="space-y-4">
+        <div class="flex justify-center items-center w-full">
+          <div class="flex items-center justify-center">
+            <p class="text-lg text-center font-semibold text-gray-900">
+              Share Your Moment
+            </p>
           </div>
-          <div
-            *ngIf="step !== 4"
-            class="flex-grow h-1 mx-2"
-            [ngClass]="{
-              'bg-red-500': currentStep > step,
-              'bg-gray-300': currentStep <= step
-            }"
-          ></div>
-        </ng-container>
-      </div>
+        </div>
 
-
-      <div *ngIf="currentStep === 1">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">
-          Step 1: Upload Image
-        </h2>
-        <div class="flex flex-col items-center">
-
+        <div class="relative">
           <input
-            #imageInput
             type="file"
-            id="image"
-            accept=".jpg, .jpeg, .png"
-            (change)="onImageSelect($event)"
+            (change)="onImageSelected($event)"
+            multiple
             class="hidden"
+            id="image-upload"
+            [disabled]="selectedImages.length >= 5"
           />
-
           <label
-            for="image"
-            class="py-2 px-4 mb-2 mbg-gray-300 text-gray-700 rounded-lg bg-gray-400 cursor-pointer hover:bg-gray-400"
+            for="image-upload"
+            class="w-full h-32 bg-gray-200 border-dashed border-4 border-gray-300 flex items-center justify-center cursor-pointer rounded-lg hover:bg-gray-300 transition-all duration-300"
           >
-            Choose a file
+            <i class="fas fa-plus-circle text-2xl text-gray-500 mr-2"></i>
+            <span class="text-xl text-gray-500">Upload Images</span>
           </label>
 
-          <div *ngIf="fileName" class="mt-4 mb-2 flex items-center">
-            <span class="text-gray-700 mr-2">{{ fileName }}</span>
-            <span
-              class="cursor-pointer text-red-500 hover:text-red-700"
-              (click)="resetImage(imageInput)"
-            >
-              ✖
-            </span>
+          <div class="mt-4 flex gap-4 overflow-x-auto">
+            <div *ngFor="let image of selectedImages" class="relative">
+              <img
+                [src]="image.url"
+                class="w-32 h-32 object-cover rounded-lg"
+              />
+              <button
+                (click)="removeImage(image)"
+                class="absolute top-0 right-0 text-red-500 bg-white rounded-full p-1 shadow-lg"
+              >
+                <i class="fas fa-times text-lg"></i>
+              </button>
+            </div>
           </div>
-
-          <p class="text-sm text-red-500 mt-2" *ngIf="imageError">
-            {{ imageError }}
-          </p>
-          <p class="text-sm text-gray-500 mt-2">
-            Max file size: 5MB. Formats: JPG, JPEG, PNG.
-          </p>
+    
         </div>
-      </div>
+        
 
-      <div *ngIf="currentStep === 2">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">
-          Step 2: Add Title
-        </h2>
-        <input
-          type="text"
-          placeholder="Enter post title"
-          formControlName="title"
-          class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
-        <p
-          *ngIf="
-            createPostForm.get('title')?.touched &&
-            createPostForm.get('title')?.hasError('required')
-          "
-          class="text-sm text-red-500"
-        >
-          Title is required.
-        </p>
-        <p
-          *ngIf="
-            createPostForm.get('title')?.touched &&
-            createPostForm.get('title')?.hasError('minlength')
-          "
-          class="text-sm text-red-500"
-        >
-          Title must be at least 3 characters long.
-        </p>
-      </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <input
+              formControlName="title"
+              class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              type="text"
+              placeholder="Enter post title"
+            />
+          </div>
+          <textarea
+            formControlName="description"
+            class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="Write a description..."
+            rows="4"
+          ></textarea>
+        </div>
 
-      <div *ngIf="currentStep === 3">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">
-          Step 3: Add Description
-        </h2>
-        <textarea
-          rows="4"
-          placeholder="Enter post description"
-          formControlName="description"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-        ></textarea>
-        <p
-          *ngIf="hasError(createPostForm, 'description', 'required')"
-          class="text-sm text-red-500"
-        >
-          Description is required.
-        </p>
-        <p
-          *ngIf="hasError(createPostForm, 'description', 'minlength')"
-          class="text-sm text-red-500"
-        >
-          Description must be at least 10 characters long.
-        </p>
-      </div>
+        <div class="flex gap-2">
+          <input
+            formControlName="tags"
+            class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            type="text"
+            placeholder="Add tags (e.g. #food, #travel)"
+          />
+          <button
+            type="button"
+            (click)="addTag()"
+            class="text-red-500 text-xl mt-3"
+          >
+            <i class="fas fa-plus-circle"></i>
+          </button>
+        </div>
 
-      <div *ngIf="currentStep === 4">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">
-          Step 4: Add Tags
-        </h2>
-        <input
-          type="text"
-          placeholder="Enter tags separated by commas"
-          formControlName="tags"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
-        <p
-          *ngIf="hasError(createPostForm, 'tags', 'required')"
-          class="text-sm text-red-500"
-        >
-          Tags are required.
-        </p>
-      </div>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let tag of selectedTags"
+            class="bg-blue-100 text-blue-700 rounded-full py-1 px-3 text-sm"
+          >
+            {{ tag }}
+            <button (click)="removeTag(tag)" class="text-red-500 ml-2">
+              <i class="fas fa-times-circle"></i>
+            </button>
+          </span>
+        </div>
 
-      <div class="mt-6 flex justify-between">
-        <button
-          (click)="prevStep()"
-          [disabled]="currentStep === 1"
-          class="py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Previous
-        </button>
-        <button
-          (click)="nextStep()"
-          [disabled]="!isStepValid()"
-          class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ currentStep === 4 ? "Submit" : "Next" }}
-        </button>
+        <div class="mt-4 flex justify-center">
+          <button
+            type="submit"
+            class="px-6 py-2 bg-red-500 text-white rounded-lg"
+          
+          >
+            Post
+          </button>
+        </div>
       </div>
     </form>
   </div>

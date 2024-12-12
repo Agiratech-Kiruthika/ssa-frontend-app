@@ -1,116 +1,155 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { hasError } from '../../../service/utility/validator';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import Compressor from 'compressorjs';
+import { PostService } from '../../../service/http/createPost.service';
 
 @Component({
   selector: 'app-create-post',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule],
+  imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule, FormsModule],
   templateUrl: './create-post.component.html',
-  styleUrl: './create-post.component.scss',
+  styleUrls: ['./create-post.component.scss'],
 })
 export class CreatePostComponent {
-  currentStep = 1;
-  createPostForm: FormGroup;
-  imageError: string | null = null;
-  fileName: string | null = null;
+  postForm: FormGroup;
+  selectedImages: any[] = [];
+  selectedTags: string[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef,
+    private postService: PostService
   ) {
-    this.createPostForm = this.fb.group({
-      image: [null, Validators.required],
-      title: ['', [Validators.required, Validators.minLength(6)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      tags: ['', Validators.required],
+    this.postForm = this.fb.group({
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      tags: [[]],
+      images: [[]],
     });
   }
 
-  isStepValid(): boolean {
-    const currentControl = this.getCurrentControlName();
-    return currentControl
-      ? this.createPostForm.get(currentControl)?.valid ?? false
-      : true;
-  }
+  onImageSelected(event: any): void {
+    const files = event.target.files;
 
-  getCurrentControlName(): string | null {
-    switch (this.currentStep) {
-      case 1:
-        return 'image';
-      case 2:
-        return 'title';
-      case 3:
-        return 'description';
-      case 4:
-        return 'tags';
-      default:
-        return null;
-    }
-  }
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
-  nextStep() {
-    if (this.currentStep < 4) {
-      this.currentStep++;
-    } else {
-      this.submitPost();
-    }
-  }
-
-  prevStep() {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-    }
-  }
-
-  onImageSelect(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const validExtensions = ['image/jpeg', 'image/png', 'image/jpg'];
-      const maxSize = 5 * 1024 * 1024;
-
-      if (!validExtensions.includes(file.type)) {
-        this.imageError = 'Only JPG, JPEG, and PNG files are allowed.';
-        this.createPostForm.get('image')?.setValue(null);
-        this.fileName = null;
-      } else if (file.size > maxSize) {
-        this.imageError = 'File size exceeds 5MB.';
-        this.createPostForm.get('image')?.setValue(null);
-        this.fileName = null;
-      } else {
-        this.imageError = null;
-        this.createPostForm.get('image')?.setValue(file);
-        this.fileName = file.name;
+      if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+        this.snackBar.open(
+          'Only JPG, JPEG, and PNG files are allowed!',
+          'Close',
+          { duration: 3000 }
+        );
+        return;
       }
+
+      if (file.size > 5 * 1024 * 1024) {
+        this.snackBar.open('File size exceeds 5MB!', 'Close', {
+          duration: 3000,
+        });
+        return;
+      }
+
+      new Compressor(file, {
+        quality: 0.8,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        success: (compressedFile) => {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            this.selectedImages.push({
+              url: e.target.result,
+              file: compressedFile,
+            });
+
+            this.postForm.get('images')?.setValue(this.selectedImages);
+
+            this.cdr.detectChanges();
+          };
+          reader.onerror = (error) => {
+            console.error('FileReader error:', error);
+            this.snackBar.open('Error reading image file', 'Close', {
+              duration: 3000,
+            });
+          };
+          reader.readAsDataURL(compressedFile);
+        },
+        error: (err) => {
+          console.error('Image compression failed', err);
+        },
+      });
     }
   }
 
-  submitPost() {
-    if (this.createPostForm.valid) {
-      console.log('Form Submitted:', this.createPostForm.value);
-      this.snackBar.open('Post created successfully!', 'Close', {
-        duration: 3000, 
-       });
+  removeImage(image: any): void {
+    this.selectedImages = this.selectedImages.filter((i) => i !== image);
+    this.postForm.get('images')?.setValue(this.selectedImages);
+  }
+
+  addTag(): void {
+    const tag = this.postForm.get('tags')?.value.trim();
+    if (tag && !this.selectedTags.includes(tag)) {
+      this.selectedTags.push(tag);
+      this.postForm.get('tags')?.setValue('');
     }
   }
 
-
-  resetImage(imageInput: HTMLInputElement) {
-    imageInput.value = '';
-    this.createPostForm.get('image')?.setValue(null);
-    this.fileName = null;
-    this.imageError = null;
+  removeTag(tag: string): void {
+    this.selectedTags = this.selectedTags.filter((t) => t !== tag);
+    this.postForm.get('tags')?.setValue(this.selectedTags);
   }
 
-  get hasError() {
-    return hasError;
+  postContent(): void {
+    if (
+      this.postForm.valid &&
+      this.selectedImages.length > 0 &&
+      this.selectedTags.length > 0
+    ) {
+      const formData = new FormData();
+
+      this.postForm.get('tags')?.setValue(this.selectedTags);
+
+      formData.append('title', this.postForm.get('title')?.value);
+      formData.append('description', this.postForm.get('description')?.value);
+
+      formData.append('tags', JSON.stringify(this.selectedTags));
+
+      this.selectedImages.forEach((image) => {
+        formData.append('images', image.file, image.file.name);
+      });
+
+      const userId = 3;
+
+      this.postService.createPost(formData, userId).subscribe(
+        (response) => {
+          this.snackBar.open('Post created successfully!', 'Close', {
+            duration: 3000,
+          });
+        },
+        (error) => {
+          console.error('Error creating post:', error);
+          this.snackBar.open(
+            'Failed to create post. Please try again.',
+            'Close',
+            { duration: 3000 }
+          );
+        }
+      );
+    } else {
+      this.snackBar.open(
+        'Please fill all required fields and add images and tags!',
+        'Close',
+        { duration: 3000 }
+      );
+    }
   }
 }
