@@ -62,4 +62,11 @@ export class PostService {
 
     return this.http.get<any>(url, { params });
   }
+
+  deletePost(postId: number, userId: number): Observable<any> {
+    const url = `${environment.apiUrl}/post/${postId}`;
+    const params = new HttpParams().set('userId', userId.toString());
+
+    return this.http.delete<any>(url, { params });
+  }
 }
