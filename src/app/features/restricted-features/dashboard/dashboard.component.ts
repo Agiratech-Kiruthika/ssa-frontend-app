@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { CreatePostComponent } from '../create-post/create-post.component';
 import { FeedComponent } from '../feed/feed.component';
 import { HomeComponent } from '../home/home.component';
-import { LogoutConfirmationComponent } from '../../../ui/logout-confirmation/logout-confirmation.component';
+import { LogoutConfirmationComponent } from '../../../ui/confirmation-dialog/confirmation.component';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
@@ -18,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 export class DashboardComponent {
   selectedSection: string = 'home';
 
-  constructor(private authService: AuthService, private router: Router,private dialog: MatDialog) {}
+  constructor(private authService: AuthService, private router: Router, private dialog: MatDialog) {}
 
   changeSection(section: string) {
     this.selectedSection = section;
@@ -32,11 +32,17 @@ export class DashboardComponent {
   confirmLogout() {
     const dialogRef = this.dialog.open(LogoutConfirmationComponent, {
       width: '400px',
+      data: {
+        title: 'Confirm Logout',
+        message: 'Are you sure you want to log out?',
+        confirmButtonText: 'Yes, Logout',
+        cancelButtonText: 'Cancel',
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.logout(); 
+        this.logout();
       }
     });
   }
