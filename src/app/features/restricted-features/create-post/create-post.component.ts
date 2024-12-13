@@ -61,7 +61,7 @@ export class CreatePostComponent {
 
       new Compressor(file, {
         quality: 0.8,
-        maxWidth: 5867,  
+        maxWidth: 5867,
         maxHeight: 3911,
         success: (compressedFile) => {
           const reader = new FileReader();
@@ -127,7 +127,7 @@ export class CreatePostComponent {
         formData.append('images', image.file, image.file.name);
       });
 
-      const userId = 3;
+      const userId = localStorage.getItem('userId') as unknown as number;
 
       this.postService.createPost(formData, userId).subscribe(
         (response) => {

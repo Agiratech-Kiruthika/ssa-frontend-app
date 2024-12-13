@@ -1,85 +1,47 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { PostService } from '../../service/http/createPost.service';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-post-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './post-list.component.html',
-  styleUrl: './post-list.component.scss',
+  styleUrls: ['./post-list.component.scss'],
 })
-export class PostListComponent implements OnInit {
-  posts: any[] = [];
-  isLoading: boolean=false;
- 
-  constructor(private postService: PostService) {}
+export class PostListComponent implements OnChanges {
+  @Input() posts: any[] = []; 
+  @Output() likeToggled = new EventEmitter<any>();
+  @Output() commentAdded = new EventEmitter<{ post: any; comment: string }>();
+  @Output() postEdited = new EventEmitter<any>();
 
-  ngOnInit(): void {
-    this.getPosts();
+  searchQuery = '';
+  filteredPosts: any[] = [];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['posts'] && changes['posts'].currentValue) {
+      this.filteredPosts = [...this.posts];
+    }
   }
 
-  toggleLike(post: any): void {
-    post.isLiked = !post.isLiked;
-    post.likes += post.isLiked ? 1 : -1;
+  onToggleLike(post: any): void {
+    this.likeToggled.emit(post);
   }
 
-  openComments(post: any): void {
-    console.log(`Opening comments for post ID: ${post.id}`);
+  onAddComment(post: any, comment: string): void {
+    this.commentAdded.emit({ post, comment });
   }
-  // getPosts(): void {
-  //   const userId = 14;
-  //   this.postService.getPost(userId).subscribe(
-  //     (response) => {
-  //       if (response && response.data) {
-  //         this.posts = Array.isArray(response.data)
-  //           ? response.data
-  //           : [response.data];
-  //         console.log('post', this.posts);
-  //       } else {
-  //         console.error(
-  //           'Response does not contain a valid data field:',
-  //           response
-  //         );
-  //       }
-  //     },
-  //     (error) => {
-  //       console.error('Error fetching posts:', error);
-  //     }
-  //   );
-  // }
 
-   // Method to fetch all posts
-  
-  
-  
-   getPosts(): void {
-    const pageNo = 0;       // Current page number
-    const pageSize = 10;    // Number of posts per page
-    const sortBy = 'createdAt';  // Sorting criteria (e.g., createdAt)
-    const tags = '';        // Optional: filter by tags, can be a comma-separated string
-  
-    this.isLoading = true;
-  
-    this.postService.getPosts(pageNo, pageSize, sortBy, tags).subscribe(
-      (response) => {
-        if (response && response.data && response.data.content) {
-          // Access the content array from the response data
-          this.posts = response.data.content;
-         
+  onEditPost(post: any): void {
+    this.postEdited.emit(post);
+  }
 
-          console.log('Fetched posts:', this.posts);
-        } else {
-          console.error('Response does not contain valid data:', response);
-        }
-        this.isLoading = false;
-      },
-      (error) => {
-        console.error('Error fetching posts:', error);
-        this.isLoading = false;
-      }
+  onSearch(): void {
+    const query = this.searchQuery.toLowerCase();
+    this.filteredPosts = this.posts.filter(
+      post =>
+        post.title.toLowerCase().includes(query) ||
+        post.tags.some((tag: string) => tag.toLowerCase().includes(query))
     );
   }
-  
-  
 }
