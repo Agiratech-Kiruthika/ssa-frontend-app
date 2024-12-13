@@ -1,120 +1,74 @@
-import { CommonModule } from '@angular/common'; 
-
-import { Component } from '@angular/core'; 
-
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PostListComponent } from "../../../ui/post-list/post-list.component"; 
+import { PostListComponent } from '../../../ui/post-list/post-list.component';
+import { PostService } from '../../../service/http/createPost.service';
 
- 
- 
+@Component({
+  selector: 'app-feed',
+  standalone: true,
+  imports: [CommonModule, FormsModule, PostListComponent],
+  templateUrl: './feed.component.html',
+  styleUrls: ['./feed.component.scss'],
+})
+export class FeedComponent implements OnInit {
+  posts: any[] = [];
+  isLoading: boolean = false;
 
-@Component({ 
+  constructor(private postService: PostService) {}
 
-selector: 'app-feed', 
+  ngOnInit(): void {
+    this.getPosts();
+  }
 
-standalone: true, 
+  getPosts(): void {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      return;
+    }
 
-imports: [CommonModule, FormsModule, PostListComponent], 
+    const pageNo = 0;
+    const pageSize = 10;
+    const sortBy = 'createdAt';
+    const tags = '';
 
-templateUrl: './feed.component.html', 
+    this.isLoading = true;
 
-styleUrl: './feed.component.scss' 
+    this.postService
+      .getPost(parseInt(userId, 10), pageNo, pageSize, sortBy, tags)
+      .subscribe(
+        (response) => {
+          if (response && response.data) {
+            this.posts = response.data.content;
+          } else {
+            console.error('Invalid response structure:', response);
+          }
+          this.isLoading = false;
+        },
+        (error) => {
+          console.error('Error fetching posts:', error);
+          this.isLoading = false;
+        }
+      );
+  }
 
-}) 
+  toggleLike(post: any): void {
+    post.liked = !post.liked;
+  }
 
-export class FeedComponent { 
+  addComment(post: any, comment: string): void {
+    if (comment.trim()) {
+      post.comments = post.comments || [];
+      post.comments.push(comment);
+      console.log(`Comment added to post:`, post);
+    }
+  }
 
- 
- 
-
-posts = [ 
-
-{ 
-
-title: "Post Title 1", 
-
-description: "Description of the post", 
-
-imageUrl: "/assets/images/social-media.jpg", 
-
-comments: ["Great post!", "Interesting read."], 
-
-liked: false // Add the liked property to track the like status 
-
-}, 
-
-{ 
-
-title: "Post Title 2", 
-
-description: "Another description", 
-
-imageUrl: "/assets/images/social-media.jpg", 
-
-comments: ["Nice post!", "I learned a lot."], 
-
-liked: false // Same for the second post 
-
-} 
-
-]; 
-
- 
- 
-
-newComment: string = ''; 
-
- 
- 
-
-// Toggle Like functionality 
-
-toggleLike(post: any) { 
-
-post.liked = !post.liked; 
-
-} 
-
- 
- 
-
-// Add Comment functionality 
-
-addComment(post: any) { 
-
-if (this.newComment.trim()) { 
-
-post.comments.push(this.newComment); 
-
-this.newComment = ''; // Reset comment input 
-
-} 
-
-} 
-
- 
- 
-
-// Edit Post functionality 
-
-editPost(post: any) { 
-
-const newTitle = prompt('Edit Post Title', post.title); 
-
-if (newTitle && newTitle.trim()) { 
-
-post.title = newTitle; 
-
-} 
-
-} 
-
-} 
-
- 
- 
- 
- 
- 
-
- 
+  editPost(post: any): void {
+    const newTitle = prompt('Edit Post Title', post.title);
+    if (newTitle && newTitle.trim()) {
+      post.title = newTitle;
+      console.log(`Post title edited:`, post);
+    }
+  }
+}
