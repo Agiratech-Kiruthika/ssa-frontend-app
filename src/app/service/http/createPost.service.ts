@@ -69,4 +69,44 @@ export class PostService {
 
     return this.http.delete<any>(url, { params });
   }
+
+  toggleLike(postId: number, userId: number): Observable<any> {
+    const url = `${environment.apiUrl}/likes/post/${postId}`;
+    const params = new HttpParams().set('userId', userId.toString());
+
+    return this.http.post<any>(url, null, { params });
+  }
+
+  addComment(postId: number, userId: number, comment: string): Observable<any> {
+    const url = `${environment.apiUrl}/comment/posts/${postId}`;
+    const body = { userId: userId, comment: comment };
+
+    return this.http.post<any>(url, body, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  getComments(postId: number): Observable<any> {
+    const url = `${environment.apiUrl}/comment/post/${postId}`;
+    return this.http.get<any>(url);
+  }
+
+  deleteComment(
+    postId: number,
+    commentId: number,
+    userId: number
+  ): Observable<any> {
+    const url = `${environment.apiUrl}/comment/${postId}/comments/${commentId}?userId=${userId}`;
+    return this.http.delete(url);
+  }
+
+  updateComment(
+    commentId: number,
+    comment: string,
+    userId: number
+  ): Observable<any> {
+    const url = `${environment.apiUrl}/comment/${commentId}`;
+    const body = { comment, userId };
+    return this.http.patch(url, body);
+  }
 }

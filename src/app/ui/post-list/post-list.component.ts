@@ -14,6 +14,7 @@ import { PostService } from '../../service/http/createPost.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { LogoutConfirmationComponent } from '../confirmation-dialog/confirmation.component';
+import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
 
 @Component({
   selector: 'app-post-list',
@@ -24,13 +25,13 @@ import { LogoutConfirmationComponent } from '../confirmation-dialog/confirmation
 })
 export class PostListComponent implements OnInit, OnChanges {
   @Input() posts: any[] = [];
+  @Input() currentUserId!: number;
   @Output() likeToggled = new EventEmitter<any>();
   @Output() commentAdded = new EventEmitter<{ post: any; comment: string }>();
   @Output() postEdited = new EventEmitter<any>();
 
   searchQuery = '';
   filteredPosts: any[] = [];
-  currentUserId!: number;
 
   constructor(
     private http: HttpClient,
@@ -54,11 +55,37 @@ export class PostListComponent implements OnInit, OnChanges {
   }
 
   onToggleLike(post: any): void {
-    this.likeToggled.emit(post);
+    const userId = this.currentUserId;
+    if (post.liked) {
+      post.liked = false;
+      post.likes -= 1;
+    } else {
+      post.liked = true;
+      post.likes += 1;
+    }
+
+    this.postService.toggleLike(post.id, userId).subscribe({
+      next: () => {
+        console.log('Like status updated successfully.');
+      },
+      error: (error) => {
+        console.error('Error toggling like:', error);
+        post.liked = !post.liked;
+        post.likes += post.liked ? 1 : -1;
+      },
+    });
   }
 
-  onAddComment(post: any, comment: string): void {
-    this.commentAdded.emit({ post, comment });
+  openCommentDialog(post: any): void {
+    const dialogRef = this.dialog.open(CommentDialogComponent, {
+      width: 'auto',
+      data: { post },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+      }
+    });
   }
 
   onEditPost(post: any): void {
@@ -83,21 +110,20 @@ export class PostListComponent implements OnInit, OnChanges {
         cancelButtonText: 'Cancel',
       },
     });
-  
+
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // Proceed with deletion
         const userId = this.currentUserId;
         if (!userId) {
           return;
         }
-  
+
         this.postService.deletePost(postId, userId).subscribe({
           next: (response: any) => {
             if (response) {
               this.posts = this.posts.filter((post) => post.id !== postId);
               this.filteredPosts = this.posts;
-  
+
               this.snackBar.open('Post deleted successfully!', 'Close', {
                 duration: 3000,
               });
