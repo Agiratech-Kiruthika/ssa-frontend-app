@@ -10,6 +10,7 @@ import {
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import Compressor from 'compressorjs';
 import { PostService } from '../../../service/http/createPost.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-post',
@@ -27,7 +28,8 @@ export class CreatePostComponent {
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
-    private postService: PostService
+    private postService: PostService,
+    private router: Router 
   ) {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
@@ -134,6 +136,9 @@ export class CreatePostComponent {
           this.snackBar.open('Post created successfully!', 'Close', {
             duration: 3000,
           });
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 3000); 
         },
         (error) => {
           console.error('Error creating post:', error);
