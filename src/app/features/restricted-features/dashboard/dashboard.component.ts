@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../service/http/auth.service';
 import { CommonModule } from '@angular/common';
 import { CreatePostComponent } from '../create-post/create-post.component';
@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CreatePostComponent, FeedComponent, HomeComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })

@@ -1,6 +1,6 @@
 <div class="w-full flex justify-center">
   <div class="max-w-4xl w-full p-4">
- 
+
     <div class="mb-4 relative">
       <input
         type="text"
@@ -9,22 +9,33 @@
         [(ngModel)]="searchQuery"
         (input)="onSearch()"
       />
-
       <i class="fas fa-search absolute left-2 top-2 text-gray-500"></i>
     </div>
 
+    <div *ngIf="filteredPosts.length === 0" class="flex justify-center items-center min-h-[calc(100vh-4rem)]">
+      <div class="text-center">
+        <img src="assets/images/no-data.png" alt="No Records" class="w-32 h-32 mx-auto" />
+        <p class="text-lg text-gray-600">No records available</p>
+      </div>
+    </div>
 
-    <div
-      *ngFor="let post of filteredPosts"
-      class="mb-6 bg-white shadow rounded-lg"
-    >
+    <div *ngFor="let post of filteredPosts" class="mb-6 bg-white shadow rounded-lg">
+      
+      <!-- If the post is a repost, add the reposted content -->
+      <div *ngIf="post.isReposted" class="bg-gray-100 p-4 mb-4">
+        <div class="flex items-center justify-start space-x-4">
+          <div class="text-xs text-gray-700">
+            <strong>Reposted by:</strong> {{ post.sharedBy.username }} <br/>
+            <strong>Comment:</strong> {{ post.repostComment }} <br/>
+          </div>
+        </div>
+      </div>
 
+      <!-- Original Post Content -->
       <div class="flex items-center justify-between p-4 border-b">
         <div class="flex items-center w-auto">
-          <div
-            class="w-10 h-10 flex items-center justify-center bg-gray-300 text-gray-700 font-semibold rounded-full"
-          >
-            {{ post.userName | slice : 0 : 1 }}
+          <div class="w-10 h-10 flex items-center justify-center bg-gray-300 text-gray-700 font-semibold rounded-full">
+            {{ post.userName | slice: 0:1 }}
           </div>
           <div class="ml-2 text-left">
             <p class="font-semibold text-black-900">
@@ -33,100 +44,65 @@
             <p class="text-sm text-black-500">{{ post.title }}</p>
           </div>
         </div>
-        <div class="flex items-center space-x-4">
-          <button
-            class="focus:outline-none text-gray-500 hover:text-gray-700"
-            (click)="onEditPost(post)"
-          >
+        <div  *ngIf="post.userId == currentUserId" class="flex items-center space-x-4">
+          <button class="focus:outline-none text-gray-500 hover:text-gray-700" (click)="onEditPost(post)">
             <i class="fas fa-edit text-xl"></i>
           </button>
-          <button
-            [disabled]="post.userId !== currentUserId"
-            class="text-gray-500 hover:text-gray-700 focus:outline-none"
-            [ngClass]="{
-              'cursor-not-allowed text-gray-300': post.userId !== currentUserId,
-              'text-red-500': post.userId === currentUserId
-            }"
-            (click)="onDeletePost(post.id)"
-          >
+          <button [disabled]="post.userId !== currentUserId" class="text-gray-500 hover:text-gray-700 focus:outline-none" 
+                  [ngClass]="{ 'cursor-not-allowed text-gray-300': post.userId !== currentUserId, 'text-red-500': post.userId === currentUserId }" 
+                  (click)="onDeletePost(post.id)">
             <i class="fas fa-trash-alt text-xl"></i>
           </button>
         </div>
       </div>
 
-
-      <div class="relative" *ngIf="post.images">
-        <img
-          [src]="post.images"
-          alt="Post Image"
-          class="post-image w-full object-cover"
-          loading="lazy"
-        />
+      <!-- Post Content -->
+      <div class="relative">
+        <img *ngIf="post.images" [src]="post.images" alt="Post Image" class="post-image w-full object-cover" loading="lazy" />
       </div>
-
 
       <div class="p-1">
         <div class="text-sm text-black-500 text-left">
           <p class="inline">
-            {{ post.isExpanded
-              ? post.description
-              : (post.description | slice: 0:130) + "..." }}
+            {{ post.isExpanded ? post.description : (post.description | slice: 0:130) + '...' }}
           </p>
-          <button
-            class="text-blue-500 text-xs focus:outline-none inline"
-            (click)="post.isExpanded = !post.isExpanded"
-          >
-            {{ post.isExpanded ? "Read Less" : "Read More" }}
+          <button class="text-blue-500 text-xs focus:outline-none inline" (click)="post.isExpanded = !post.isExpanded">
+            {{ post.isExpanded ? 'Read Less' : 'Read More' }}
           </button>
         </div>
       </div>
 
-
+      <!-- Tags -->
       <div class="p-1">
         <div class="flex flex-wrap gap-2">
-          <span
-            *ngFor="let tag of post.tags"
-            class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded"
-          >
+          <span *ngFor="let tag of post.tags" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
             {{ tag }}
           </span>
         </div>
       </div>
 
-
+      <!-- Repost/Share Section -->
       <div class="p-4 border-t">
-        <div class="flex items-center justify-start space-x-4">
+        <div class="flex items-center justify-around space-x-4">
           <div>
-            <button
-              class="focus:outline-none"
-              [class.text-red-500]="post.liked"
-              [class.text-gray-500]="!post.liked"
-              (click)="onToggleLike(post)"
-            >
+            <button class="focus:outline-none" 
+            [ngClass]="post.liked ? 'text-red-500' : 'text-gray-500'"
+                        (click)="onToggleLike(post)">
               <i class="fas fa-heart text-xl"></i>
             </button>
-            <p class="text-xs text-gray-800 font-semibold text-left">
-              {{ post.likes || 0 }} likes
-            </p>
+            <p class="text-xs text-gray-800 font-semibold text-left">{{ post.likes || 0 }} likes</p>
           </div>
           <div>
-            <button
-            class="focus:outline-none text-gray-500 hover:text-gray-700"
-            (click)="openCommentDialog(post)"
-          >
-            <i class="fas fa-comment text-xl"></i>
-          </button>
-            <p class="text-xs text-gray-800 font-semibold text-left">
-              {{ post.comments || 0 }} comments
-            </p>
-          </div>
-          <div>
-            <button class="text-gray-500 hover:text-gray-700">
-              <i class="fas fa-share text-xl"></i>
+            <button class="focus:outline-none text-gray-500 hover:text-gray-700" (click)="openCommentDialog(post)">
+              <i class="fas fa-comment text-xl"></i>
             </button>
-            <p class="text-xs text-gray-800 font-semibold text-left">
-              {{ post.shares || 0 }} shares
-            </p>
+            <p class="text-xs text-gray-800 font-semibold text-left">{{ post.comments || 0 }} comments</p>
+          </div>
+          <div>
+            <button class="focus:outline-none text-gray-500 hover:text-gray-700" (click)="openRepostDialog(post)">
+              <i class="fas fa-repeat text-xl"></i>
+            </button>
+            <p class="text-xs text-gray-800 font-semibold text-left">{{ post.share || 0 }} Repost
           </div>
         </div>
       </div>
