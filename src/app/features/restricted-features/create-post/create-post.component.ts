@@ -23,6 +23,7 @@ export class CreatePostComponent {
   postForm: FormGroup;
   selectedImages: any[] = [];
   selectedTags: string[] = [];
+  loading = false; 
 
   constructor(
     private fb: FormBuilder,
@@ -41,10 +42,10 @@ export class CreatePostComponent {
 
   onImageSelected(event: any): void {
     const files = event.target.files;
-
+  
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-
+  
       if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
         this.snackBar.open(
           'Only JPG, JPEG, and PNG files are allowed!',
@@ -53,14 +54,14 @@ export class CreatePostComponent {
         );
         return;
       }
-
+  
       if (file.size > 5 * 1024 * 1024) {
         this.snackBar.open('File size exceeds 5MB!', 'Close', {
           duration: 3000,
         });
         return;
       }
-
+  
       new Compressor(file, {
         quality: 0.8,
         maxWidth: 5867,
@@ -68,13 +69,14 @@ export class CreatePostComponent {
         success: (compressedFile) => {
           const reader = new FileReader();
           reader.onload = (e: any) => {
+            // Show the image preview immediately after selection
             this.selectedImages.push({
               url: e.target.result,
               file: compressedFile,
             });
-
+  
             this.postForm.get('images')?.setValue(this.selectedImages);
-
+  
             this.cdr.detectChanges();
           };
           reader.onerror = (error) => {
@@ -91,6 +93,7 @@ export class CreatePostComponent {
       });
     }
   }
+  
 
   removeImage(image: any): void {
     this.selectedImages = this.selectedImages.filter((i) => i !== image);
@@ -116,6 +119,7 @@ export class CreatePostComponent {
       this.selectedImages.length > 0 &&
       this.selectedTags.length > 0
     ) {
+      this.loading = true;
       const formData = new FormData();
 
       this.postForm.get('tags')?.setValue(this.selectedTags);
@@ -136,9 +140,7 @@ export class CreatePostComponent {
           this.snackBar.open('Post created successfully!', 'Close', {
             duration: 3000,
           });
-          setTimeout(() => {
-            this.router.navigate(['/dashboard']);
-          }, 3000); 
+          this.router.navigate(['/home']);
         },
         (error) => {
           console.error('Error creating post:', error);

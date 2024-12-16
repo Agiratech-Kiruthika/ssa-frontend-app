@@ -6,6 +6,8 @@ import { CreateAccountComponent } from './features/unrestricted-features/user-si
 import { CreatePostComponent } from './features/restricted-features/create-post/create-post.component';
 import { AuthGuard } from './service/guards/auth.guard';
 import { DashboardComponent } from './features/restricted-features/dashboard/dashboard.component';
+import { HomeComponent } from './features/restricted-features/home/home.component';
+import { FeedComponent } from './features/restricted-features/feed/feed.component';
 
 export const routes: Routes = [
   {
@@ -31,10 +33,17 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [AuthGuard],
+    path: '',
+    component: DashboardComponent, 
+    children: [
+      { path: 'home', component: HomeComponent },
+      { path: 'feed', component: FeedComponent },
+      { path: 'create', component: CreatePostComponent },
+      { path: '', redirectTo: '/home', pathMatch: 'full' }, 
+    ],
   },
+  { path: '**', redirectTo: '/home' }, 
+
 ];
 
 @NgModule({

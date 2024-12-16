@@ -109,4 +109,13 @@ export class PostService {
     const body = { comment, userId };
     return this.http.patch(url, body);
   }
+
+  sharePost(userId: number, postId: number, comment: string): Observable<any> {
+    const url = `${environment.apiUrl}/share`;  
+    const body = { userId, postId, comment };
+
+    return this.http.post<any>(url, body, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }

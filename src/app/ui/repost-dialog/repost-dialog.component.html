@@ -1,0 +1,22 @@
+<h2 mat-dialog-title class="text-lg font-semibold text-gray-800">Repost</h2>
+<mat-dialog-content>
+  <p class="text-sm text-gray-600 mb-2">Add a comment to your repost:</p>
+  <textarea
+    matInput
+    [(ngModel)]="repostComment"
+    rows="3"
+    placeholder="Write something..."
+    class="w-full border border-gray-300 rounded-lg p-2 text-sm resize-none focus:ring focus:ring-blue-200"
+  ></textarea>
+</mat-dialog-content>
+<mat-dialog-actions class="flex justify-end gap-2 mt-4">
+  <button 
+    mat-button 
+    class="px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md" 
+    (click)="onCancel()">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    class="px-4 py-2 text-sm text-white bg-red-600  rounded-md" 
+    (click)="onConfirm()">Repost</button>
+</mat-dialog-actions>

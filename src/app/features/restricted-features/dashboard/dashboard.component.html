@@ -14,33 +14,37 @@
       </div>
     </div>
 
+    <!-- Home Button -->
     <button
-      (click)="changeSection('home')"
-      [class.bg-red-600]="selectedSection === 'home'"
+      [routerLink]="['/home']"
+      routerLinkActive="bg-red-600"
       class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
     >
       <i class="fa fa-home text-lg"></i>
       <span>Home</span>
     </button>
 
+    <!-- Feed Button -->
     <button
-      (click)="changeSection('feed')"
-      [class.bg-red-600]="selectedSection === 'feed'"
+      [routerLink]="['/feed']"
+      routerLinkActive="bg-red-600"
       class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
     >
       <i class="fa fa-list text-lg"></i>
       <span>Your Feed</span>
     </button>
 
+    <!-- Create Post Button -->
     <button
-      (click)="changeSection('create')"
-      [class.bg-red-600]="selectedSection === 'create'"
+      [routerLink]="['/create']"
+      routerLinkActive="bg-red-600"
       class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
     >
       <i class="fa fa-plus-circle text-lg"></i>
       <span>Create Post</span>
     </button>
 
+    <!-- Logout Button -->
     <button
       class="py-2 px-4 rounded-md hover:bg-[#e1306c] text-left font-medium flex items-center space-x-2"
       (click)="confirmLogout()"
@@ -50,15 +54,8 @@
     </button>
   </div>
 
-  <div class="flex-1 bg-[#e7e5e4] bg-pink ml-64 overflow-y-auto">
-    <div *ngIf="selectedSection === 'home'" class="text-center">
-      <app-home></app-home>
-    </div>
-    <div *ngIf="selectedSection === 'feed'" class="text-center">
-      <app-feed></app-feed>
-    </div>
-    <div *ngIf="selectedSection === 'create'" class="text-center">
-      <app-create-post></app-create-post>
-    </div>
+  <!-- Main Content -->
+  <div class="flex-1 bg-[#e7e5e4] ml-64 overflow-y-auto">
+    <router-outlet></router-outlet>
   </div>
 </div>
