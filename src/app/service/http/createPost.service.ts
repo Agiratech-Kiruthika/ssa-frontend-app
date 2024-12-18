@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
 
@@ -111,11 +111,33 @@ export class PostService {
   }
 
   sharePost(userId: number, postId: number, comment: string): Observable<any> {
-    const url = `${environment.apiUrl}/share`;  
+    const url = `${environment.apiUrl}/share`;
     const body = { userId, postId, comment };
 
     return this.http.post<any>(url, body, {
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+
+  updatePost(
+    postId: number,
+    formData: FormData,
+    userId: number
+  ): Observable<any> {
+    const url = `${environment.apiUrl}/post/update/${postId}`;
+
+    formData.append('userId', userId.toString());
+
+    return this.http.patch(url, formData);
+  }
+
+  getPostById(postId: number): Observable<any> {
+    const url = `${environment.apiUrl}/post/get/${postId}`;
+    return this.http.get<any>(url);
+  }
+
+  getLikedPosts(userId: number, pageNo: number, pageSize: number) {
+    const url = `${environment.apiUrl}/likes/user/${userId}?page_no=${pageNo}&page_size=${pageSize}&sort_by=createdAt`;
+    return this.http.get<any>(url);
   }
 }

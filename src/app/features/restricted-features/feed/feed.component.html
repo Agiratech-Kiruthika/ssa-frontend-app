@@ -1,9 +1,3 @@
-<div class="p-4">
-  <app-post-list
-    *ngIf="!isLoading"
-    [posts]="posts"
-    (likeToggled)="toggleLike($event)"
-    (commentAdded)="addComment($event.post, $event.comment)"
-    (postEdited)="editPost($event)"
-  ></app-post-list>
+<div class="p-4" (scroll)="onScroll($event)" style="height: 730px ; overflow-y: auto;">
+  <app-post-list [posts]="posts"></app-post-list>
 </div>

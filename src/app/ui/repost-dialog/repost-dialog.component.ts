@@ -24,6 +24,7 @@ export class RepostDialogComponent {
   }
 
   onConfirm(): void {
+    this.data.post.share = (this.data.post.share || 0) + 1;
     this.dialogRef.close({
       post: this.data.post,
       comment: this.repostComment,

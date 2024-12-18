@@ -56,7 +56,7 @@ export class UserLoginComponent implements OnInit {
           duration: 3000,
         });
         this.isSubmitting = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       },
       error: (error) => {
         this.snackbar.open("Invalid Credentials", 'Close', {

@@ -22,8 +22,6 @@ export class CommentDialogComponent {
   editingCommentId: number | null = null;
   updatedText: string = '';
 
-  @Output() commentUpdated = new EventEmitter<any>(); 
-
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<CommentDialogComponent>,
@@ -75,8 +73,10 @@ export class CommentDialogComponent {
       .addComment(this.post.id, this.currentUserId, comment.text)
       .subscribe({
         next: (response) => {
+          if (response.status.code === '1000') {
+            this.post.comments = (this.post.comments || 0) + 1;
+          }
           this.loadComments();
-          this.commentUpdated.emit(this.post);
         },
         error: (error) => {},
       });
@@ -88,7 +88,6 @@ export class CommentDialogComponent {
       .subscribe({
         next: (response) => {
           this.loadComments();
-          this.commentUpdated.emit(this.post);
         },
         error: (error) => {},
       });
@@ -109,7 +108,9 @@ export class CommentDialogComponent {
       .deleteComment(this.post.id, comment.commentId, this.currentUserId)
       .subscribe({
         next: (response) => {
-          this.commentUpdated.emit(this.post);
+          if (response) {
+            this.post.comments = (this.post.comments || 1) - 1;
+          }
         },
         error: (error) => {
           this.comments.splice(index, 0, comment);

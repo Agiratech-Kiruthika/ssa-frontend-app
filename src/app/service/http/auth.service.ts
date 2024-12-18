@@ -17,9 +17,8 @@ export class AuthService {
     return this.http.post<any>(this.apiUrl, loginPayload).pipe(
       map((response) => {
         if (response) {
-          const customToken = this.generateCustomToken(email, password);
 
-          localStorage.setItem('token', customToken);
+          localStorage.setItem('token', response.data.token);
           localStorage.setItem('userId', response.data.userId);
 
           return response.data;
@@ -33,10 +32,7 @@ export class AuthService {
     );
   }
 
-  private generateCustomToken(email: string, password: string): string {
-    const tokenData = `${email}:${password}`;
-    return btoa(tokenData);
-  }
+
 
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
