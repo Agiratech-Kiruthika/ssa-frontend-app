@@ -34,16 +34,19 @@ export const routes: Routes = [
   },
   {
     path: '',
-    component: DashboardComponent, 
+    component: DashboardComponent,
     children: [
       { path: 'home', component: HomeComponent },
       { path: 'feed', component: FeedComponent },
       { path: 'create', component: CreatePostComponent },
-      { path: '', redirectTo: '/home', pathMatch: 'full' }, 
+      {
+        path: 'update/:postId',
+        component: CreatePostComponent,
+      },
+      { path: '', redirectTo: '/home', pathMatch: 'full' },
     ],
+    canActivate: [AuthGuard],
   },
-  { path: '**', redirectTo: '/home' }, 
-
 ];
 
 @NgModule({

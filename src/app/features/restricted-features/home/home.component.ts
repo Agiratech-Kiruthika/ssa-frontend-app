@@ -12,6 +12,8 @@ import { PostService } from '../../../service/http/createPost.service';
 export class HomeComponent implements OnInit {
   posts: any[] = [];
   isLoading: boolean = false;
+  currentPage: number = 0;
+  hasMoreData: boolean = true;
 
   constructor(private postService: PostService) {}
 
@@ -20,27 +22,45 @@ export class HomeComponent implements OnInit {
   }
 
   getAllPosts(): void {
+    if (this.isLoading || !this.hasMoreData) return;
+
     this.isLoading = true;
 
-    const pageNo = 0; 
-    const pageSize = 10; 
-    const sortBy = 'createdAt'; 
+    const pageNo = this.currentPage;
+    const pageSize = 10;
+    const sortBy = 'createdAt';
     const tags = '';
-
     this.postService.getPosts(pageNo, pageSize, sortBy, tags).subscribe(
       (response) => {
         if (response && response.data && response.data.content) {
-          this.posts = response.data.content;
-          console.log('Fetched all posts:', this.posts);
+          console.log("response",response)
+          const newPosts = response.data.content;
+          this.posts = [...this.posts, ...newPosts];
+
+          if (newPosts.length < pageSize) {
+            this.hasMoreData = false;
+          } else {
+            this.currentPage++;
+          }
         } else {
-          console.error('Invalid response:', response);
+          this.hasMoreData = false;
         }
         this.isLoading = false;
       },
       (error) => {
-        console.error('Error fetching all posts:', error);
         this.isLoading = false;
       }
     );
+  }
+
+  onScroll(event: any): void {
+    const element = event.target;
+
+    const bottom =
+      element.scrollHeight - element.scrollTop <= element.clientHeight + 20;
+
+    if (bottom) {
+      this.getAllPosts();
+    }
   }
 }

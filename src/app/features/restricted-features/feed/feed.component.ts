@@ -14,6 +14,8 @@ import { PostService } from '../../../service/http/createPost.service';
 export class FeedComponent implements OnInit {
   posts: any[] = [];
   isLoading: boolean = false;
+  currentPage: number = 0; 
+  hasMoreData: boolean = true; 
 
   constructor(private postService: PostService) {}
 
@@ -21,54 +23,54 @@ export class FeedComponent implements OnInit {
     this.getPosts();
   }
 
+ 
   getPosts(): void {
+    if (this.isLoading || !this.hasMoreData) return; // Prevent loading if already fetching or no more data
+
+    this.isLoading = true;
     const userId = localStorage.getItem('userId');
     if (!userId) {
+      this.isLoading = false;
       return;
     }
 
-    const pageNo = 0;
+    const pageNo = this.currentPage;
     const pageSize = 10;
     const sortBy = 'createdAt';
     const tags = '';
-
-    this.isLoading = true;
 
     this.postService
       .getPost(parseInt(userId, 10), pageNo, pageSize, sortBy, tags)
       .subscribe(
         (response) => {
           if (response && response.data) {
-            this.posts = response.data.content;
+            const newPosts = response.data.content;
+            this.posts = [...this.posts, ...newPosts]; 
+
+            if (newPosts.length < pageSize) {
+              this.hasMoreData = false;
+            } else {
+              this.currentPage++; 
+            }
           } else {
-            console.error('Invalid response structure:', response);
           }
           this.isLoading = false;
         },
         (error) => {
-          console.error('Error fetching posts:', error);
           this.isLoading = false;
         }
       );
   }
 
-  toggleLike(post: any): void {
-    post.liked = !post.liked;
-  }
 
-  addComment(post: any, comment: string): void {
-    if (comment.trim()) {
-      post.comments = post.comments || [];
-      post.comments.push(comment);
-      console.log(`Comment added to post:`, post);
+  onScroll(event: any): void {
+    const bottom = event.target.scrollHeight === event.target.scrollTop + event.target.clientHeight;
+    if (bottom && !this.isLoading && this.hasMoreData) {
+      this.getPosts(); 
     }
   }
 
-  editPost(post: any): void {
-    const newTitle = prompt('Edit Post Title', post.title);
-    if (newTitle && newTitle.trim()) {
-      post.title = newTitle;
-      console.log(`Post title edited:`, post);
-    }
-  }
+
+ 
+
 }

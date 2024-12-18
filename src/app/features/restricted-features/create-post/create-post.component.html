@@ -5,11 +5,12 @@
         <div class="flex justify-center items-center w-full">
           <div class="flex items-center justify-center">
             <p class="text-lg text-center font-semibold text-gray-900">
-              Share Your Moment
+              {{ postId ? 'Update Your Post' : 'Share Your Moment' }}
             </p>
           </div>
         </div>
 
+        <!-- Image Upload Section -->
         <div class="relative">
           <input
             type="file"
@@ -42,10 +43,9 @@
               </button>
             </div>
           </div>
-    
         </div>
-        
 
+        <!-- Title and Description Section -->
         <div class="space-y-2">
           <div class="flex justify-between">
             <input
@@ -62,7 +62,8 @@
             rows="4"
           ></textarea>
         </div>
-
+        
+        <!-- Tags Section -->
         <div class="flex gap-2">
           <input
             formControlName="tags"
@@ -77,10 +78,9 @@
           >
             <i class="fas fa-plus-circle"></i>
           </button>
-
         </div>
-       
 
+        <!-- Display Tags -->
         <div class="flex flex-wrap gap-2 mt-2">
           <span
             *ngFor="let tag of selectedTags"
@@ -93,24 +93,24 @@
           </span>
         </div>
 
+        <!-- Submit Button Section -->
         <div class="mt-4 flex justify-center">
-        
           <button
             *ngIf="!loading"
             type="submit"
             class="px-6 py-2 bg-red-500 text-white rounded-lg"
           >
-            Post
+            {{ postId ? 'Update Post' : 'Post' }}
           </button>
         
+          <!-- Loading Spinner -->
           <div *ngIf="loading" class="flex items-center justify-center space-x-2">
             <div
               class="w-6 h-6 border-4 border-t-4 border-gray-200 rounded-full animate-spin border-t-red-500"
             ></div>
-            <span class="text-gray-700">Posting...</span>
+            <span class="text-gray-700">{{ postId ? 'Updating...' : 'Posting...' }}</span>
           </div>
         </div>
-        
       </div>
     </form>
   </div>
