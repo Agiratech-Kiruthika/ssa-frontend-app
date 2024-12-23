@@ -1,3 +1,8 @@
 <div class="p-4" (scroll)="onScroll($event)" style="height: 730px ; overflow-y: auto;">
   <app-post-list [posts]="posts"></app-post-list>
+  <div *ngIf=" !this.isLoading && this.hasMoreData" class="flex justify-center items-center py-4">
+    <div
+      class="w-10 h-10 border-4 border-t-4 border-gray-300 border-t-red-500 rounded-full animate-spin"
+    ></div>
+  </div>
 </div>

@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { PostListComponent } from '../../../ui/post-list/post-list.component';
 import { PostService } from '../../../service/http/createPost.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [PostListComponent],
+  imports: [PostListComponent, CommonModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
@@ -33,7 +34,6 @@ export class HomeComponent implements OnInit {
     this.postService.getPosts(pageNo, pageSize, sortBy, tags).subscribe(
       (response) => {
         if (response && response.data && response.data.content) {
-          console.log("response",response)
           const newPosts = response.data.content;
           this.posts = [...this.posts, ...newPosts];
 
@@ -48,7 +48,8 @@ export class HomeComponent implements OnInit {
         this.isLoading = false;
       },
       (error) => {
-        this.isLoading = false;
+        console.error(error);
+        this.isLoading = false; 
       }
     );
   }
@@ -59,7 +60,7 @@ export class HomeComponent implements OnInit {
     const bottom =
       element.scrollHeight - element.scrollTop <= element.clientHeight + 20;
 
-    if (bottom) {
+    if (bottom && !this.isLoading && this.hasMoreData) {
       this.getAllPosts();
     }
   }
