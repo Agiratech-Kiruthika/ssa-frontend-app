@@ -104,6 +104,8 @@ export class CreateAccountComponent implements OnInit {
         minLength: 'Password must be at least 8 characters long.',
         upperCase: 'Password must contain at least one uppercase letter.',
         lowerCase: 'Password must contain at least one lowercase letter.',
+        number:'Password must contain at least one number',
+        maxLength:'Password should not greater than 30 characters',
         specialCharacter:
           'Password must include at least one special character.',
         noSpaces: 'Password cannot contain spaces.',

@@ -24,6 +24,12 @@ export function passwordValidator(): ValidatorFn {
     if (value.length < 8) {
       errors['minLength'] = true;
     }
+    if(value.length > 30){
+      errors['maxLength'] = true;
+    }
+    if(!/[0-9]/.test(value)){
+      errors['number']=true;
+    }
     if (!/[A-Z]/.test(value)) {
       errors['upperCase'] = true;
     }
